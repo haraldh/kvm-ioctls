@@ -230,6 +230,22 @@ ioctl_iowr_nr!(KVM_GET_REG_LIST, KVMIO, 0xb0, kvm_reg_list);
 /* Available with KVM_CAP_SET_GUEST_DEBUG */
 ioctl_iow_nr!(KVM_SET_GUEST_DEBUG, KVMIO, 0x9b, kvm_guest_debug);
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+ioctl_ior_nr!(
+    KVM_MEMORY_ENCRYPT_REG_REGION,
+    KVMIO,
+    0xBB,
+    kvm_enc_region
+);
+
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+ioctl_ior_nr!(
+    KVM_MEMORY_ENCRYPT_UNREG_REGION,
+    KVMIO,
+    0xBC,
+    kvm_enc_region
+);
+
 // Device ioctls.
 
 /* Available with KVM_CAP_DEVICE_CTRL */

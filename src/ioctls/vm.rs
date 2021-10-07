@@ -109,6 +109,84 @@ impl VmFd {
         }
     }
 
+    /// Register a guest memory region which may contain encrypted data.
+    ///
+    /// See the documentation for `KVM_MEMORY_ENCRYPT_REG_REGION`.
+    ///
+    /// # Arguments
+    ///
+    /// * `enc_region` - Guest physical memory region. For details check the
+    ///             `kvm_enc_region` structure in the
+    ///             [KVM API doc](https://www.kernel.org/doc/Documentation/virtual/kvm/api.txt).
+    ///
+    /// # Example
+    ///
+    /// ```rust,no_run
+    /// # extern crate kvm_ioctls;
+    /// # extern crate kvm_bindings;
+    /// use kvm_bindings::bindings::kvm_enc_region;
+    /// use kvm_ioctls::Kvm;
+    /// let kvm = Kvm::new().unwrap();
+    /// let vm = kvm.create_vm().unwrap();
+    /// let enc_region = kvm_enc_region {
+    ///                     addr: 0x10000 as u64,
+    ///                     size: 0x10000 as u64,
+    ///                 };
+    /// vm.encrypt_register_region(&enc_region).unwrap();
+    /// ```
+    ///
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    pub fn encrypt_register_region(
+        &self,
+        enc_region: &kvm_enc_region,
+    ) -> Result<()> {
+        let ret = unsafe { ioctl_with_ref(self, KVM_MEMORY_ENCRYPT_REG_REGION(), &enc_region) };
+        if ret == 0 {
+            Ok(())
+        } else {
+            Err(errno::Error::last())
+        }
+    }
+
+    /// Unregister the guest memory region registered with `encrypt_register_region`.
+    ///
+    /// See the documentation for `KVM_MEMORY_ENCRYPT_UNREG_REGION`.
+    ///
+    /// # Arguments
+    ///
+    /// * `enc_region` - Guest physical memory region. For details check the
+    ///             `kvm_enc_region` structure in the
+    ///             [KVM API doc](https://www.kernel.org/doc/Documentation/virtual/kvm/api.txt).
+    ///
+    /// Corresponds to the `KVM_MEMORY_ENCRYPT_REG_REGION` ioctl
+    /// # Example
+    ///
+    /// ```rust,no_run
+    /// # extern crate kvm_ioctls;extern crate kvm_bindings;
+    /// # use kvm_bindings::bindings::kvm_enc_region;
+    /// use kvm_ioctls::Kvm;
+    /// let kvm = Kvm::new().unwrap();
+    /// let vm = kvm.create_vm().unwrap();
+    /// let enc_region = kvm_enc_region {
+    ///                     addr: 0x10000 as u64,
+    ///                     size: 0x10000 as u64,
+    ///                 };
+    /// vm.encrypt_unregister_region(&enc_region).unwrap();
+    /// ```
+    ///
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    pub fn encrypt_unregister_region(
+        &self,
+        enc_region: &kvm_enc_region,
+    ) -> Result<()> {
+        let ret = unsafe { ioctl_with_ref(self, KVM_MEMORY_ENCRYPT_UNREG_REGION(), &enc_region) };
+        if ret == 0 {
+            Ok(())
+        } else {
+            Err(errno::Error::last())
+        }
+    }
+
     /// Sets the address of the three-page region in the VM's address space.
     ///
     /// See the documentation for `KVM_SET_TSS_ADDR`.
